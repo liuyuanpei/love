@@ -21,12 +21,10 @@ body{
     overflow:hidden;
 }
 
-h1{
-    font-size:42px;
-}
+h1{font-size:42px;}
 
-.lyric{
-    font-size:30px;
+.text{
+    font-size:28px;
     margin-top:20px;
     opacity:0;
     transform: translateY(30px);
@@ -40,7 +38,6 @@ h1{
     transform: translateY(0);
 }
 
-/* 按钮 */
 button{
     margin-top:30px;
     padding:10px 25px;
@@ -58,11 +55,8 @@ button{
     color:rgba(255,255,255,0.7);
     animation: fall linear infinite;
 }
-
 @keyframes fall{
-    to{
-        transform: translateY(100vh);
-    }
+    to{ transform: translateY(100vh); }
 }
 </style>
 </head>
@@ -70,14 +64,27 @@ button{
 <body>
 
 <h1>罗涵 ❤️</h1>
-<div id="lyric" class="lyric">点一下开始</div>
-<button onclick="start()">开始</button>
+<div id="text" class="text">点一下开始</div>
+<button onclick="next()">点我</button>
 
 <audio id="bgm" src="music.mp3"></audio>
 
 <script>
 
-// ✅ 你的LRC歌词（已经帮你放进来了）
+// 👉 你想说的话（先出现）
+const messages = [
+"今天其实有点想你",
+"不是突然想的",
+"是一直在想",
+"有些话我不太会说",
+"但我还是想让你知道",
+"这首歌代表我的心意 ❤️"
+];
+
+let step = 0;
+let startedMusic = false;
+
+// 👉 你的歌词（LRC）
 const lrcText = `
 [00:02.150]当这世界已经准备将我遗弃
 [00:08.500]像一个伤兵被留在孤独荒野里
@@ -91,83 +98,64 @@ const lrcText = `
 [00:59.300]你的爱像氧气帮忙我呼吸
 [01:05.650]我又能呼吸 我又能呼吸
 [01:12.000]你就是不愿意放弃
-[01:18.350]生命中充满乱七八糟的问题
-[01:24.700]像走在没有出口的那个迷宫里
-[01:31.050]Oh no 一次又一次只会用借口逃避
-[01:37.400]怎么你从来没对我彻底的死心
-[01:43.750]我有何德何能值得你珍惜
-[01:50.100]为何你对我有求必应
-[01:56.450]每次一想到你 像雨过天晴
-[02:02.800]看见一只蝴蝶飞过废墟
-[02:09.150]是那么的美丽 就像一个奇迹
-[02:15.500]让我从倒下的地方站起
-[02:21.850]Woo... 只要一靠近你
-[02:25.200]就觉得安心
-[02:28.550]你看着我的眼没有怀疑
-[02:34.900]你对我的相信
-[02:38.250]让我又能重生
-[02:41.600]不管世界多冷我还有你
-[02:47.950]我有你
-[02:54.300]爱我这样的人对你来说不容易
-[03:00.650]我的痛苦你也经历
-[03:04.000]你是唯一 陪我到天堂与地狱
-[03:10.350]每次一想到你
-[03:13.700]像雨过天晴 看见一只蝴蝶飞过了废墟
-[03:23.050]我能撑得下去 我会忘了过去
-[03:29.400]是你让我找回新的生命
-[03:35.750]Yeah... 每次一见到你 就心存感激
-[03:42.100]现在我能坦然面对自己
-[03:48.450]我会永远珍惜 我会永远爱你
-[03:54.800]在我心底的你位置没有人能代替
-[04:01.150]Yeah 你就是那唯一
 `;
 
-// 🔥 解析歌词
 let lyrics = [];
 lrcText.split("\n").forEach(line=>{
-    const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
-    if(match){
-        const time = parseInt(match[1])*60 + parseFloat(match[2]);
-        lyrics.push({time,text:match[3]});
+    const m = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
+    if(m){
+        lyrics.push({
+            time: parseInt(m[1])*60 + parseFloat(m[2]),
+            text: m[3]
+        });
     }
 });
 
-let index = 0;
+let lrcIndex = 0;
 
-function start(){
-    const music = document.getElementById("bgm");
-    music.play();
+function next(){
+    const el = document.getElementById("text");
 
-    music.ontimeupdate = ()=>{
-        if(index < lyrics.length && music.currentTime >= lyrics[index].time){
-            showLyric(lyrics[index].text);
-            index++;
-        }
+    // 👉 先播放你说的话
+    if(step < messages.length){
+        show(messages[step]);
+        step++;
+        return;
+    }
+
+    // 👉 到最后才开始音乐 + 歌词
+    if(!startedMusic){
+        startedMusic = true;
+        document.getElementById("bgm").play();
+
+        document.getElementById("bgm").ontimeupdate = function(){
+            let current = this.currentTime;
+            if(lrcIndex < lyrics.length && current >= lyrics[lrcIndex].time){
+                show(lyrics[lrcIndex].text);
+                lrcIndex++;
+            }
+        };
     }
 }
 
-function showLyric(text){
-    const el = document.getElementById("lyric");
+function show(text){
+    const el = document.getElementById("text");
     el.classList.remove("show");
-
     setTimeout(()=>{
         el.innerText = text;
         el.classList.add("show");
     },200);
 }
 
-// ❤️ 爱心动画
+// ❤️ 爱心
 setInterval(()=>{
     const heart = document.createElement("div");
     heart.innerHTML = "❤";
     heart.className = "heart";
-
     heart.style.left = Math.random()*100+"vw";
-    heart.style.fontSize = (10 + Math.random()*20)+"px";
-    heart.style.animationDuration = (3 + Math.random()*5)+"s";
-
+    heart.style.fontSize = (10+Math.random()*20)+"px";
+    heart.style.animationDuration = (3+Math.random()*5)+"s";
     document.body.appendChild(heart);
-
     setTimeout(()=>heart.remove(),8000);
 },300);
 
