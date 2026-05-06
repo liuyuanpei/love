@@ -1,87 +1,10 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>罗涵 ❤️</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500&display=swap" rel="stylesheet">
-
-<style>
-body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    background:#0b0b0c;
-    color:white;
-    font-family:'Noto Sans SC', sans-serif;
-    overflow:hidden;
-}
-
-h1{
-    font-size:34px;
-    color:#ff2e63;
-    letter-spacing:2px;
-}
-
-.text{
-    font-size:24px;
-    margin-top:20px;
-    opacity:0;
-    transform:translateY(20px) scale(0.9);
-    transition:all 0.6s ease;
-    text-align:center;
-    padding:0 30px;
-}
-
-.show{
-    opacity:1;
-    transform:translateY(0) scale(1.05);
-}
-
-.highlight{
-    font-size:36px;
-    color:#ff2e63;
-    text-shadow:0 0 20px rgba(255,46,99,0.7);
-}
-
-button{
-    margin-top:30px;
-    padding:10px 25px;
-    border:none;
-    border-radius:20px;
-    background:#ff2e63;
-    color:white;
-    font-size:16px;
-}
-
-/* ❤️ 爱心 */
-.heart{
-    position: fixed;
-    top:-10px;
-    color:rgba(255,46,99,0.6);
-    animation: fall linear infinite;
-}
-@keyframes fall{
-    to{ transform: translateY(100vh); }
-}
-</style>
-</head>
-
-<body>
-
-<h1>罗涵 ❤️</h1>
-<div id="text" class="text">点一下开始</div>
-<button onclick="next()">点我</button>
-
-<audio id="bgm" src="music.mp3"></audio>
-
 <script>
 
-// 💌 表白
+// ====== 状态控制 ======
+let stage = "start"; // start -> q1 -> q2 -> main -> music
+let reject = 0;
+
+// ====== 表白 ======
 const messages = [
 "今天其实有点想你",
 "不是突然想的",
@@ -92,12 +15,10 @@ const messages = [
 ];
 
 let step = 0;
-let started = false;
 
-// 🔥 核心偏移（已经适配你这首）
+// ====== 🔥 用你自己的歌词（完整保留） ======
 const offset = 0.5;
 
-// 🎵 完整歌词
 const lyrics = [
 {time:0.01,text:"当这世界已经准备将我遗弃"},
 {time:6.00,text:"像一个伤兵被留在孤独荒野里"},
@@ -143,58 +64,121 @@ const lyrics = [
 ];
 
 let index = 0;
+let started = false;
 
+// ====== 主按钮 ======
 function next(){
 
-    if(step < messages.length){
-        show(messages[step], false);
-        step++;
+    if(stage === "start"){
+        stage = "q1";
+        showQ1();
         return;
     }
 
-    if(!started){
-        started = true;
-        const music = document.getElementById("bgm");
-
-        music.play().catch(()=>{
-            alert("点一下页面再点按钮");
-        });
-
-        music.ontimeupdate = ()=>{
-            let current = music.currentTime + offset;
-
-            if(index < lyrics.length && current >= lyrics[index].time){
-                show(lyrics[index].text, true);
-                index++;
-            }
-        };
+    if(stage === "main"){
+        if(step < messages.length){
+            show(messages[step], false);
+            step++;
+        }else{
+            startMusic();
+            stage = "music";
+        }
     }
 }
 
-function show(text, isLyric){
-    const el = document.getElementById("text");
-    el.classList.remove("show","highlight");
-
-    setTimeout(()=>{
-        el.innerText = text;
-        el.classList.add("show");
-        if(isLyric) el.classList.add("highlight");
-    },200);
+// ====== 问题1 ======
+function showQ1(){
+    setText("你觉得我怎么样？");
+    createBtns(["好","很好"], ()=>{
+        stage = "q2";
+        showQ2();
+    });
 }
 
-// ❤️ 爱心
-setInterval(()=>{
-    const heart = document.createElement("div");
-    heart.innerHTML = "❤";
-    heart.className = "heart";
-    heart.style.left = Math.random()*100+"vw";
-    heart.style.fontSize = (10+Math.random()*20)+"px";
-    heart.style.animationDuration = (4+Math.random()*6)+"s";
-    document.body.appendChild(heart);
-    setTimeout(()=>heart.remove(),8000);
-},400);
+// ====== 问题2 ======
+function showQ2(){
+    setText("有没有兴趣做我的女朋友？");
+
+    createBtns(["有","没有"], (c)=>{
+
+        if(c === "有"){
+            clearBtns();
+            stage = "main";
+            show(messages[0], false);
+            step = 1;
+        }else{
+            reject++;
+
+            let yes = document.getElementById("btn0");
+            let no = document.getElementById("btn1");
+
+            if(reject === 1){
+                yes.style.transform="scale(1.3)";
+            }else if(reject === 2){
+                yes.style.transform="scale(1.6)";
+                no.style.transform="scale(0.6)";
+            }else{
+                yes.style.position="fixed";
+                yes.style.left="0";
+                yes.style.top="0";
+                yes.style.width="100vw";
+                yes.style.height="100vh";
+                yes.style.fontSize="40px";
+            }
+        }
+    });
+}
+
+// ====== 音乐 + 歌词 ======
+function startMusic(){
+    const music = document.getElementById("bgm");
+
+    music.play();
+
+    music.ontimeupdate = ()=>{
+        let t = music.currentTime + offset;
+
+        if(index < lyrics.length && t >= lyrics[index].time){
+            show(lyrics[index].text, true);
+            index++;
+        }
+    };
+}
+
+// ====== UI ======
+function show(t, isLyric){
+    const el = document.getElementById("text");
+    el.innerText = t;
+
+    if(isLyric){
+        el.style.fontSize = "34px";
+        el.style.color = "#ff2e63";
+    }else{
+        el.style.fontSize = "24px";
+        el.style.color = "white";
+    }
+}
+
+function setText(t){
+    document.getElementById("text").innerText = t;
+}
+
+function createBtns(arr, cb){
+    clearBtns();
+    arr.forEach((t,i)=>{
+        let b = document.createElement("button");
+        b.innerText = t;
+        b.id = "btn"+i;
+        b.onclick = ()=>cb(t);
+        document.body.appendChild(b);
+    });
+}
+
+function clearBtns(){
+    document.querySelectorAll("button").forEach(b=>{
+        if(b.getAttribute("onclick")) return;
+        b.remove();
+    });
+}
 
 </script>
-
-</body>
-</html>
