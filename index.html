@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>罗涵 ❤️</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500&display=swap" rel="stylesheet">
 
 <style>
 body{
@@ -17,20 +17,24 @@ body{
     flex-direction:column;
     background: linear-gradient(135deg,#ff9a9e,#fad0c4);
     color:white;
-    font-family: 'Zhi Mang Xing', cursive;
+    font-family: 'Noto Sans SC', sans-serif;
     overflow:hidden;
 }
 
-h1{font-size:42px;}
+h1{
+    font-size:42px;
+    text-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
 
 .text{
-    font-size:28px;
+    font-size:26px;
     margin-top:20px;
     opacity:0;
-    transform: translateY(30px);
-    transition: all 0.8s;
+    transform: translateY(20px);
+    transition: all 0.6s;
     text-align:center;
     padding:0 20px;
+    text-shadow:0 2px 8px rgba(0,0,0,0.4);
 }
 
 .show{
@@ -71,7 +75,7 @@ button{
 
 <script>
 
-// 👉 你想说的话（先出现）
+// 👉 前置情话
 const messages = [
 "今天其实有点想你",
 "不是突然想的",
@@ -82,9 +86,12 @@ const messages = [
 ];
 
 let step = 0;
-let startedMusic = false;
+let started = false;
 
-// 👉 你的歌词（LRC）
+// 🔥 提前时间（修正延迟）
+const offset = 1.5;
+
+// 👉 完整歌词
 const lrcText = `
 [00:02.150]当这世界已经准备将我遗弃
 [00:08.500]像一个伤兵被留在孤独荒野里
@@ -98,6 +105,35 @@ const lrcText = `
 [00:59.300]你的爱像氧气帮忙我呼吸
 [01:05.650]我又能呼吸 我又能呼吸
 [01:12.000]你就是不愿意放弃
+[01:18.350]生命中充满乱七八糟的问题
+[01:24.700]像走在没有出口的那个迷宫里
+[01:31.050]Oh no 一次又一次只会用借口逃避
+[01:37.400]怎么你从来没对我彻底的死心
+[01:43.750]我有何德何能值得你珍惜
+[01:50.100]为何你对我有求必应
+[01:56.450]每次一想到你 像雨过天晴
+[02:02.800]看见一只蝴蝶飞过废墟
+[02:09.150]是那么的美丽 就像一个奇迹
+[02:15.500]让我从倒下的地方站起
+[02:21.850]Woo... 只要一靠近你
+[02:25.200]就觉得安心
+[02:28.550]你看着我的眼没有怀疑
+[02:34.900]你对我的相信
+[02:38.250]让我又能重生
+[02:41.600]不管世界多冷我还有你
+[02:47.950]我有你
+[02:54.300]爱我这样的人对你来说不容易
+[03:00.650]我的痛苦你也经历
+[03:04.000]你是唯一 陪我到天堂与地狱
+[03:10.350]每次一想到你
+[03:13.700]像雨过天晴 看见一只蝴蝶飞过了废墟
+[03:23.050]我能撑得下去 我会忘了过去
+[03:29.400]是你让我找回新的生命
+[03:35.750]Yeah... 每次一见到你 就心存感激
+[03:42.100]现在我能坦然面对自己
+[03:48.450]我会永远珍惜 我会永远爱你
+[03:54.800]在我心底的你位置没有人能代替
+[04:01.150]Yeah 你就是那唯一
 `;
 
 let lyrics = [];
@@ -111,30 +147,27 @@ lrcText.split("\n").forEach(line=>{
     }
 });
 
-let lrcIndex = 0;
+let index = 0;
 
 function next(){
-    const el = document.getElementById("text");
-
-    // 👉 先播放你说的话
     if(step < messages.length){
         show(messages[step]);
         step++;
         return;
     }
 
-    // 👉 到最后才开始音乐 + 歌词
-    if(!startedMusic){
-        startedMusic = true;
-        document.getElementById("bgm").play();
+    if(!started){
+        started = true;
+        const music = document.getElementById("bgm");
+        music.play();
 
-        document.getElementById("bgm").ontimeupdate = function(){
-            let current = this.currentTime;
-            if(lrcIndex < lyrics.length && current >= lyrics[lrcIndex].time){
-                show(lyrics[lrcIndex].text);
-                lrcIndex++;
+        music.ontimeupdate = ()=>{
+            let current = music.currentTime + offset;
+            if(index < lyrics.length && current >= lyrics[index].time){
+                show(lyrics[index].text);
+                index++;
             }
-        };
+        }
     }
 }
 
