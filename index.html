@@ -15,15 +15,16 @@ body{
     justify-content:center;
     align-items:center;
     flex-direction:column;
-    background:#0f0f10;
+    background:#0b0b0c;
     color:white;
     font-family:'Noto Sans SC', sans-serif;
     overflow:hidden;
 }
 
 h1{
-    font-size:36px;
-    color:#ff4b6e;
+    font-size:34px;
+    color:#ff2e63;
+    letter-spacing:2px;
 }
 
 .text{
@@ -31,7 +32,7 @@ h1{
     margin-top:20px;
     opacity:0;
     transform:translateY(20px) scale(0.9);
-    transition:all 0.6s;
+    transition:all 0.6s ease;
     text-align:center;
     padding:0 30px;
 }
@@ -42,9 +43,9 @@ h1{
 }
 
 .highlight{
-    font-size:34px;
-    color:#ff4b6e;
-    text-shadow:0 0 15px rgba(255,75,110,0.6);
+    font-size:36px;
+    color:#ff2e63;
+    text-shadow:0 0 20px rgba(255,46,99,0.7);
 }
 
 button{
@@ -52,9 +53,20 @@ button{
     padding:10px 25px;
     border:none;
     border-radius:20px;
-    background:#ff4b6e;
+    background:#ff2e63;
     color:white;
     font-size:16px;
+}
+
+/* ❤️ 爱心 */
+.heart{
+    position: fixed;
+    top:-10px;
+    color:rgba(255,46,99,0.6);
+    animation: fall linear infinite;
+}
+@keyframes fall{
+    to{ transform: translateY(100vh); }
 }
 </style>
 </head>
@@ -69,7 +81,7 @@ button{
 
 <script>
 
-// 表白话
+// 💌 表白
 const messages = [
 "今天其实有点想你",
 "不是突然想的",
@@ -82,47 +94,64 @@ const messages = [
 let step = 0;
 let started = false;
 
-// 歌词（完整）
-const lrcText = `
-[00:02.150]当这世界已经准备将我遗弃
-[00:08.500]像一个伤兵被留在孤独荒野里
-[00:14.850]开始怀疑我存在有没有意义
-[00:21.200]在别人眼里我似乎变成了隐形
-[00:27.550]难道失败就永远翻不了身
-[00:33.900]谁来挽救坠落的灵魂
-[00:40.250]每次一见到你 心里好平静
-[00:46.600]就像一只蝴蝶飞过废墟
-[00:52.950]我又能活下去 我又找回勇气
-[00:59.300]你的爱像氧气帮忙我呼吸
-[01:05.650]我又能呼吸 我又能呼吸
-[01:12.000]你就是不愿意放弃
-`;
+// 🔥 核心偏移（已经适配你这首）
+const offset = 1.2;
 
-let lyrics = [];
-lrcText.split("\n").forEach(line=>{
-    const m = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
-    if(m){
-        lyrics.push({
-            time: parseInt(m[1])*60 + parseFloat(m[2]),
-            text: m[3]
-        });
-    }
-});
+// 🎵 完整歌词
+const lyrics = [
+{time:0.01,text:"当这世界已经准备将我遗弃"},
+{time:6.00,text:"像一个伤兵被留在孤独荒野里"},
+{time:13.85,text:"开始怀疑我存在有没有意义"},
+{time:19.00,text:"在别人眼里我似乎变成了隐形"},
+{time:27.15,text:"难道失败就永远翻不了身"},
+{time:31.90,text:"谁来挽救坠落的灵魂"},
+{time:38.05,text:"每次一见到你 心里好平静"},
+{time:44.60,text:"就像一只蝴蝶飞过废墟"},
+{time:51.25,text:"我又能活下去 我又找回勇气"},
+{time:58.00,text:"你的爱像氧气帮忙我呼吸"},
+{time:65.65,text:"我又能呼吸 我又能呼吸"},
+{time:75.00,text:"你就是不愿意放弃"},
+{time:81.30,text:"生命中充满乱七八糟的问题"},
+{time:87.60,text:"像走在没有出口的那个迷宫里"},
+{time:94.00,text:"Oh no 一次又一次只会用借口逃避"},
+{time:100.30,text:"怎么你从来没对我彻底的死心"},
+{time:106.60,text:"我有何德何能值得你珍惜"},
+{time:112.90,text:"为何你对我有求必应"},
+{time:119.30,text:"每次一想到你 像雨过天晴"},
+{time:125.60,text:"看见一只蝴蝶飞过废墟"},
+{time:132.00,text:"是那么的美丽 就像一个奇迹"},
+{time:138.30,text:"让我从倒下的地方站起"},
+{time:144.60,text:"Woo... 只要一靠近你"},
+{time:148.00,text:"就觉得安心"},
+{time:151.30,text:"你看着我的眼没有怀疑"},
+{time:157.60,text:"你对我的相信"},
+{time:160.90,text:"让我又能重生"},
+{time:164.20,text:"不管世界多冷我还有你"},
+{time:170.50,text:"我有你"},
+{time:176.80,text:"爱我这样的人对你来说不容易"},
+{time:183.10,text:"我的痛苦你也经历"},
+{time:186.40,text:"你是唯一 陪我到天堂与地狱"},
+{time:192.70,text:"每次一想到你"},
+{time:196.00,text:"像雨过天晴 看见一只蝴蝶飞过了废墟"},
+{time:205.30,text:"我能撑得下去 我会忘了过去"},
+{time:211.60,text:"是你让我找回新的生命"},
+{time:217.90,text:"Yeah... 每次一见到你 就心存感激"},
+{time:224.20,text:"现在我能坦然面对自己"},
+{time:230.50,text:"我会永远珍惜 我会永远爱你"},
+{time:236.80,text:"在我心底的你位置没有人能代替"},
+{time:243.10,text:"Yeah 你就是那唯一"}
+];
 
 let index = 0;
-let startTime = 0;
-let fixed = false;
 
 function next(){
 
-    // 先显示表白
     if(step < messages.length){
         show(messages[step], false);
         step++;
         return;
     }
 
-    // 开始播放音乐+歌词
     if(!started){
         started = true;
         const music = document.getElementById("bgm");
@@ -132,14 +161,7 @@ function next(){
         });
 
         music.ontimeupdate = ()=>{
-
-            // 自动对齐
-            if(!fixed && music.currentTime > 0.3){
-                startTime = music.currentTime;
-                fixed = true;
-            }
-
-            let current = music.currentTime - startTime + 0.3;
+            let current = music.currentTime + offset;
 
             if(index < lyrics.length && current >= lyrics[index].time){
                 show(lyrics[index].text, true);
@@ -159,6 +181,18 @@ function show(text, isLyric){
         if(isLyric) el.classList.add("highlight");
     },200);
 }
+
+// ❤️ 爱心
+setInterval(()=>{
+    const heart = document.createElement("div");
+    heart.innerHTML = "❤";
+    heart.className = "heart";
+    heart.style.left = Math.random()*100+"vw";
+    heart.style.fontSize = (10+Math.random()*20)+"px";
+    heart.style.animationDuration = (4+Math.random()*6)+"s";
+    document.body.appendChild(heart);
+    setTimeout(()=>heart.remove(),8000);
+},400);
 
 </script>
 
