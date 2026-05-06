@@ -19,7 +19,7 @@ body{
     overflow:hidden;
 }
 
-/* 气泡（高级感） */
+/* 气泡（保持你的高级风格） */
 .text{
     font-size:26px;
     text-align:center;
@@ -54,7 +54,7 @@ button{
     color:white;
 }
 
-/* 全屏 */
+/* 全屏提示 */
 .fullText{
     position:fixed;
     left:0;top:0;
@@ -103,6 +103,30 @@ button{
     opacity:0;
     transition:0.3s;
 }
+
+/* ===== 新增：歌词模式 ===== */
+.lyric{
+    font-size:34px !important;
+    background:none !important;
+    box-shadow:none !important;
+    backdrop-filter:none !important;
+}
+
+/* 歌词动画 */
+.fadeIn{
+    animation: lyricFade 0.8s ease;
+}
+
+@keyframes lyricFade{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
 </style>
 </head>
 
@@ -132,7 +156,7 @@ const messages=[
 
 let step=0;
 
-// ===== 歌词（你的完整版）=====
+// ===== 歌词（完全你的版本）=====
 const offset=0.5;
 const lyrics=[
 {time:0.01,text:"当这世界已经准备将我遗弃"},
@@ -223,6 +247,15 @@ const div=document.createElement("div");
 div.className="fullText";
 div.innerText="那我再努努力让你喜欢我";
 document.body.appendChild(div);
+
+// ⭐ 新增：点击继续
+div.onclick=()=>{
+div.remove();
+stage="main";
+step=0;
+setText(messages[step]);
+step++;
+};
 }
 }
 });
@@ -249,7 +282,17 @@ setTimeout(()=>h.remove(),8000);
 music.ontimeupdate=()=>{
 let t=music.currentTime+offset;
 if(index<lyrics.length && t>=lyrics[index].time){
+
 setText(lyrics[index].text);
+
+const el=document.getElementById("text");
+el.classList.add("lyric");
+
+// ⭐ 动画
+el.classList.remove("fadeIn");
+void el.offsetWidth;
+el.classList.add("fadeIn");
+
 index++;
 }
 };
