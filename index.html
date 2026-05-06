@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>罗涵 ❤️</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    font-family: "微软雅黑", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+/* 主容器 */
+.container {
+    text-align: center;
+    z-index: 2;
+}
+
+/* 标题 */
+h1 {
+    font-size: 48px;
+    margin: 0;
+}
+
+/* 文字 */
+#text {
+    margin-top: 20px;
+    font-size: 22px;
+    min-height: 30px;
+}
+
+/* 按钮 */
+button {
+    margin-top: 40px;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 30px;
+    background: white;
+    color: #ff4b5c;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.1);
+}
+
+/* 爱心动画 */
+.heart {
+    position: absolute;
+    color: rgba(255,255,255,0.7);
+    font-size: 20px;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    0% { transform: translateY(-10vh); opacity: 1; }
+    100% { transform: translateY(110vh); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>罗涵 ❤️</h1>
+    <div id="text"></div>
+    <button onclick="start()">点我一下</button>
+</div>
+
+<audio id="bgm" loop>
+    <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+// 文字内容（会一行一行出现）
+const texts = [
+    "今天好想你",
+    "不知道你在干嘛",
+    "只是突然很想你",
+    "想和你说说话",
+    "这首歌里有一句话",
+    "很像我现在想说的 ❤️"
+];
+
+let i = 0;
+
+// 点击开始
+function start() {
+    playMusic();
+    showText();
+}
+
+// 播放音乐（微信必须点一下才行）
+function playMusic() {
+    document.getElementById("bgm").play();
+}
+
+// 打字效果
+function showText() {
+    if (i < texts.length) {
+        document.getElementById("text").innerHTML = texts[i];
+        i++;
+        setTimeout(showText, 2000);
+    }
+}
+
+// 生成爱心
+setInterval(() => {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.innerHTML = "❤️";
+    heart.style.left = Math.random() * 100 + "vw";
+    heart.style.animationDuration = (3 + Math.random()*5) + "s";
+    document.body.appendChild(heart);
+
+    setTimeout(() => {
+        heart.remove();
+    }, 8000);
+}, 300);
+
+</script>
+
+</body>
+</html>
