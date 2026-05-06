@@ -19,7 +19,7 @@ body{
     overflow:hidden;
 }
 
-/* 气泡（保持你的高级风格） */
+/* 气泡 */
 .text{
     font-size:26px;
     text-align:center;
@@ -104,7 +104,7 @@ button{
     transition:0.3s;
 }
 
-/* ===== 新增：歌词模式 ===== */
+/* 歌词模式 */
 .lyric{
     font-size:34px !important;
     background:none !important;
@@ -144,6 +144,12 @@ button{
 let stage="start";
 let reject=0;
 
+// ⭐ 新增：记录选择
+let answers = {
+    q1: "",
+    q2: ""
+};
+
 // ===== 表白 =====
 const messages=[
 "今天其实有点想你",
@@ -156,7 +162,7 @@ const messages=[
 
 let step=0;
 
-// ===== 歌词（完全你的版本）=====
+// ===== 歌词（你的完整版）=====
 const offset=0.5;
 const lyrics=[
 {time:0.01,text:"当这世界已经准备将我遗弃"},
@@ -218,13 +224,20 @@ else{startMusic();stage="music";}
 // ===== 问题 =====
 function showQ1(){
 setText("你觉得我怎么样？");
-createBtns(["好","很好"],()=>{stage="q2";showQ2();});
+createBtns(["好","很好"],(c)=>{
+answers.q1 = c; // ⭐记录
+stage="q2";
+showQ2();
+});
 }
 
 function showQ2(){
 setText("有没有兴趣做我的女朋友？");
 
 createBtns(["有","没有"],(c)=>{
+
+answers.q2 = c; // ⭐记录
+
 if(c==="有"){
 clearBtns();
 stage="main";
@@ -248,7 +261,6 @@ div.className="fullText";
 div.innerText="那我再努努力让你喜欢我";
 document.body.appendChild(div);
 
-// ⭐ 新增：点击继续
 div.onclick=()=>{
 div.remove();
 stage="main";
@@ -288,7 +300,6 @@ setText(lyrics[index].text);
 const el=document.getElementById("text");
 el.classList.add("lyric");
 
-// ⭐ 动画
 el.classList.remove("fadeIn");
 void el.offsetWidth;
 el.classList.add("fadeIn");
