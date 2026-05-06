@@ -32,10 +32,9 @@ button{
     border-radius:20px;
     background:#ff2e63;
     color:white;
-    font-size:16px;
 }
 
-/* ❤️ 全屏按钮 */
+/* 全屏按钮 */
 .full{
     position:fixed;
     left:0;
@@ -43,6 +42,34 @@ button{
     width:100vw;
     height:100vh;
     font-size:40px;
+}
+
+/* 🐱 宠物 */
+#pet{
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    font-size: 48px;
+    cursor: pointer;
+    animation: idle 2s infinite;
+}
+@keyframes idle{
+    0%{transform:translateY(0);}
+    50%{transform:translateY(-6px);}
+    100%{transform:translateY(0);}
+}
+
+/* 💬 宠物气泡 */
+#petText{
+    position: fixed;
+    right: 80px;
+    bottom: 100px;
+    background: rgba(0,0,0,0.6);
+    padding:8px 12px;
+    border-radius:10px;
+    font-size:14px;
+    opacity:0;
+    transition:0.3s;
 }
 </style>
 </head>
@@ -53,6 +80,10 @@ button{
 <button id="mainBtn">点我</button>
 
 <audio id="bgm" src="music.mp3"></audio>
+
+<!-- 🐱 宠物 -->
+<div id="pet">🐱</div>
+<div id="petText"></div>
 
 <script>
 
@@ -163,6 +194,7 @@ function showQ2(){
             step = 0;
             setText(messages[step]);
             step++;
+            petSay("我就知道你会选这个 😏");
         }else{
             reject++;
 
@@ -171,20 +203,28 @@ function showQ2(){
 
             if(reject === 1){
                 yes.style.transform="scale(1.3)";
+                petSay("再想想嘛 🥺");
             }else if(reject === 2){
                 yes.style.transform="scale(1.6)";
                 no.style.transform="scale(0.6)";
+                petSay("真的不考虑一下吗 😭");
             }else{
                 yes.classList.add("full");
+                petSay("别点那个了！！点这个！！");
             }
         }
     });
 }
 
-// ===== 音乐 + 歌词 =====
+// ===== 音乐 =====
 function startMusic(){
     const music = document.getElementById("bgm");
     music.play();
+
+    // 🐱 开心跳
+    const pet = document.getElementById("pet");
+    pet.style.transform="scale(1.3)";
+    setTimeout(()=>pet.style.transform="",500);
 
     music.ontimeupdate = ()=>{
         let t = music.currentTime + offset;
@@ -196,14 +236,13 @@ function startMusic(){
     };
 }
 
-// ===== 工具 =====
+// ===== UI =====
 function setText(t){
     document.getElementById("text").innerText = t;
 }
 
 function createBtns(arr, cb){
     clearBtns();
-
     arr.forEach((t,i)=>{
         let b = document.createElement("button");
         b.innerText = t;
@@ -215,11 +254,34 @@ function createBtns(arr, cb){
 
 function clearBtns(){
     document.querySelectorAll("button").forEach(b=>{
-        if(b.id !== "mainBtn"){
-            b.remove();
-        }
+        if(b.id !== "mainBtn") b.remove();
     });
 }
+
+// ===== 🐱 宠物 =====
+const petLines = [
+"在干嘛呀～",
+"点‘有’试试嘛 😏",
+"我觉得你们很配诶",
+"别犹豫啦～",
+"她会心动的 💕"
+];
+
+function petSay(text){
+    const el = document.getElementById("petText");
+    el.innerText = text;
+    el.style.opacity = 1;
+    setTimeout(()=>el.style.opacity=0,2000);
+}
+
+setInterval(()=>{
+    const t = petLines[Math.floor(Math.random()*petLines.length)];
+    petSay(t);
+},5000);
+
+document.getElementById("pet").onclick = ()=>{
+    petSay("我在帮你追人呢 😎");
+};
 
 </script>
 
